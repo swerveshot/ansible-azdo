@@ -1,0 +1,51 @@
+---
+- name: "Create User for access to the AZDO databases"
+  win_shell: |
+    $ServerInstance = "{{ sql_server_instance }}"
+    $DatabaseName = "{{ sql_azdo_config_db_name }}"
+    $SQLUser = "{{ sql_user }}"
+
+    $Query = @"
+    DECLARE @Message NVARCHAR(255);
+    DECLARE @Changed BIT = 0;  -- Default value is 0
+
+    USE [$DatabaseName];
+
+    -- Check if the login exists at the server level, create if not
+    IF NOT EXISTS (
+        SELECT 1 FROM sys.server_principals 
+        WHERE name = '$SQLUser'
+    )
+    BEGIN
+        CREATE LOGIN [$SQLUser] FROM WINDOWS;
+        SET @Changed = 1;
+    END
+
+    -- Check if the user exists at the database level, create if not
+    IF NOT EXISTS (
+        SELECT 1 FROM sys.database_principals 
+        WHERE name = '$SQLUser'
+    )
+    BEGIN
+        CREATE USER [$SQLUser] FOR LOGIN [$SQLUser];
+        EXEC sp_addrolemember @rolename = N'db_owner', @membername = N'$SQLUser';
+        SET @Changed = 1;
+    END
+
+    -- Determine the message based on whether a change was detected
+    IF @Changed = 1  -- Change detected
+    BEGIN
+        SET @Message = 'User added';
+    END
+    ELSE
+    BEGIN
+        SET @Message = 'User already exists';
+    END
+    SELECT @Message AS ResultMessage;
+    "@
+
+    # Execute the SQL query using Invoke-Sqlcmd
+    Invoke-Sqlcmd -ServerInstance $ServerInstance -Query $Query -ErrorAction Stop
+  register: result
+  changed_when:
+    - '"User added" in result.stdout'

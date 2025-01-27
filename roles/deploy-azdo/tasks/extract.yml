@@ -1,0 +1,23 @@
+---
+# - name: "Check if AZDO installation path already exists" # Alternatief, check add/remove programs
+#   win_stat:
+#     path: "{{ azdo_install_path }}"
+#   register: azdo_install_path_status
+
+- name: "Check if AZDO is present in the list of installed programs"
+  win_reg_stat: 
+    path: "{{ item }}"
+  loop:
+  - "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{{ azdo_product_id }}"
+  - "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{{ azdo_product_id }}"
+  register: azdo_regkey_status
+
+- name: "Set fact if a registry key for AZDO was found"
+  set_fact:
+   azdo_install_status: "{{ azdo_regkey_status.results | selectattr('exists', 'defined') | selectattr('exists', 'equalto', true) | list | length > 0 }}"
+
+- name: "Extracting AZDO installation files (this may take a while)"
+  win_shell: >
+    Start-Process -FilePath "{{ azdo_install_executable }}" -ArgumentList "/S /CustomInstallPath `"{{ azdo_install_path }}`"" -NoNewWindow -PassThru -Wait
+  when: not azdo_install_status
+  register: azdo_extraction_status

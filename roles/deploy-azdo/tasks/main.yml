@@ -1,0 +1,19 @@
+---
+- name: "Assert that AZDO mandatory vars are defined"
+  assert:
+    that:
+      - ansible_facts is defined
+      - azdo_install_path is defined
+      - azdo_install_executable is defined
+      - azdo_build_unattendfile_path is defined
+      - sql_server_instance is defined
+      - sql_azdo_db_label is defined
+      - sql_user is defined
+    fail_msg: "Not all required parameters for AZDO are set"
+    success_msg: "All required parameters for AZDO are set"
+
+- name: "Include file extraction provisioning tasks"
+  include: extract.yml
+
+- name: "Include unattend file tasks"
+  include: unattend.yml

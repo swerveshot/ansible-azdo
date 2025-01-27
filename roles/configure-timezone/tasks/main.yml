@@ -1,0 +1,8 @@
+---
+- name: "Configure timezone for Windows machines"
+  include: windows.yml
+  when: ansible_facts['os_family'] == "Windows"
+
+- name: "Configure timezone for Linux machines"
+  include: linux.yml
+  when: ansible_facts['os_family'] == "Linux"

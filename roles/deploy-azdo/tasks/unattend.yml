@@ -1,0 +1,62 @@
+---
+# Run unattended installation of Azure Devops Server
+# Database provisioning occurs under the user running the configuration tool, not the configured service account
+# This means the user running the configuration tool (ie. the ansible user) needs to have admin privileges on SQL
+# Check documentation: https://learn.microsoft.com/en-us/azure/devops/server/command-line/tfsconfig-cmd?view=azure-devops-2022#unattend
+
+- name: "Check status of IsConfigured regkey"
+  win_reg_stat:
+    path: "{{ azdo_apptier_regkey }}"
+    name: "IsConfigured"
+  register: isconfigured
+
+- name: "Installing Azure Devops Server for first host in a cluster"
+  when:
+    - not isconfigured.value == 1
+    - inventory_hostname == ansible_play_hosts_all[0] # impact van limit bekijken, deze manier is niet het meest fool-proof
+  run_once: true
+  block:
+
+  - name: "Create unattend file for first host in a cluster"
+    win_shell: >
+      Start-Process -FilePath "{{ azdo_install_path }}\\Tools\TfsConfig.exe" -ArgumentList "unattend /create /type:NewServerBasic /unattendfile:`"{{ azdo_build_unattendfile_path }}`" /inputs:InstallSqlExpress=False;SqlInstance={{ sql_server_instance }};CreateConfigurationDatabase=True;UseExistingEmptyDatabase=True;DatabaseLabel={{ sql_azdo_db_label }};IsServiceAccountBuiltIn=False;ServiceAccountName={{ sql_user }}" -NoNewWindow -PassThru -Wait
+#      Start-Process -FilePath "{{ azdo_install_path }}\\Tools\TfsConfig.exe" -ArgumentList "unattend /create /type:NewServerBasic /unattendfile:`"{{ azdo_build_unattendfile_path }}`" /inputs:InstallSqlExpress=False;SqlInstance={{ sql_server_instance }};CreateConfigurationDatabase=True;DatabaseLabel={{ sql_azdo_db_label }};IsServiceAccountBuiltIn=False;ServiceAccountName={{ sql_user }}" -NoNewWindow -PassThru -Wait
+# argumentlist als array en/of opknippen over meerdere regels met backtick
+
+  - name: "Add ServiceAccountPassword to unattend file for first host in a cluster"
+    win_lineinfile:
+      path: "{{ azdo_build_unattendfile_path }}"
+      line: "ServiceAccountPassword={{ azdo_serviceaccount_password }}"
+
+  - name: "Run unattend installation of Azure DevOps Server for first host in a cluster (this may take a while)"
+    win_shell: >
+      Start-Process -FilePath "{{ azdo_install_path }}\\Tools\TfsConfig.exe" -ArgumentList "unattend /configure /unattendfile:`"{{ azdo_build_unattendfile_path }}`" /continue" -NoNewWindow -PassThru -Wait
+
+  - name: "Remove unattend file"
+    win_file:
+      path: "{{ azdo_build_unattendfile_path }}"
+      state: absent
+
+- name: "Installing Azure Devops Server for additional hosts in a cluster"
+  when:
+    - not isconfigured.value == 1
+    - not inventory_hostname == ansible_play_hosts_all[0]
+  block:
+
+  - name: "Create unattend file for additional hosts in a cluster"
+    win_shell: >
+      Start-Process -FilePath "{{ azdo_install_path }}\\Tools\TfsConfig.exe" -ArgumentList "unattend /create /type:ApplicationTierOnlyBasic /unattendfile:`"{{ azdo_build_unattendfile_path }}`" /inputs:InstallSqlExpress=False;SqlInstance={{ sql_server_instance }};ConfigurationDatabaseName={{ sql_azdo_config_db_name }};IsServiceAccountBuiltIn=False;ServiceAccountName={{ sql_user }}" -NoNewWindow -PassThru -Wait
+
+  - name: "Add ServiceAccountPassword to unattend file for additional hosts in a cluster"
+    win_lineinfile:
+      path: "{{ azdo_build_unattendfile_path }}"
+      line: "ServiceAccountPassword={{ azdo_serviceaccount_password }}"
+
+  - name: "Run unattend installation of Azure DevOps Server for additional hosts in a cluster (this may take a while)"
+    win_shell: >
+      Start-Process -FilePath "{{ azdo_install_path }}\\Tools\TfsConfig.exe" -ArgumentList "unattend /configure /unattendfile:`"{{ azdo_build_unattendfile_path }}`" /continue" -NoNewWindow -PassThru -Wait
+
+  - name: "Remove unattend file for additional hosts in a cluster"
+    win_file:
+      path: "{{ azdo_build_unattendfile_path }}"
+      state: absent

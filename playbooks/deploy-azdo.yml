@@ -1,0 +1,27 @@
+---
+- hosts: all
+  vars_files:
+    - ../../secrets/vault.yml
+
+  gather_facts: true
+
+  roles:
+    - role: configure-timezone
+    - role: deploy-software
+
+- hosts: database_servers
+  vars_files:
+  - ../../secrets/vault.yml
+  roles:
+    - role: deploy-mssql # Provision SQL Server databases and AZDO user
+      tags:
+        - deploy-mssql-tag
+
+- hosts: app
+  vars_files:
+    - ../../secrets/vault.yml
+  serial: 1
+  roles:
+    - role: deploy-azdo # Provision Azure DevOps Server
+      tags:
+        - deploy-azdo-tag

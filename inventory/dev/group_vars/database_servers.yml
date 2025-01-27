@@ -1,0 +1,6 @@
+---
+sql_azdo_config_db_recovery: "SIMPLE" # Set database recovery model to SIMPLE, BULK_LOGGED or FULL
+# The following variables are not mandatory, but might be used in the future
+sql_azdo_config_db_path: "C:\\Program Files\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\DATA"
+sql_azdo_config_db_file: "{{ sql_azdo_config_db_path }}\\{{ sql_azdo_config_db_name }}.mdf"
+sql_azdo_config_db_log: "{{ sql_azdo_config_db_path }}\\{{ sql_azdo_config_db_name }}_log.ldf"

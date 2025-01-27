@@ -1,0 +1,16 @@
+# Ignore vault password file
+vault_pass.txt
+
+# Ignore log files
+*.log
+ansible_log.txt
+
+# Ignore temporary files
+*.tmp
+*.swp
+*.swo
+*~
+
+# Ignore compiled python files
+__pycache__/
+*.py[cod]

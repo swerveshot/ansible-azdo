@@ -1,0 +1,17 @@
+---
+- name: "Assert that SQL mandatory vars are defined"
+  assert:
+    that:
+      - sql_server_instance is defined
+      - sql_user is defined
+      - sql_azdo_db_label is defined
+      - sql_azdo_config_db_name is defined
+      - sql_azdo_config_db_recovery is defined
+    fail_msg: "Not all required parameters for SQL are set"
+    success_msg: "All required parameters for SQL are set"
+
+- name: "Include database provisioning tasks"
+  include: deploy-database.yml
+
+- name: "Include user provisioning tasks"
+  include: deploy-user.yml

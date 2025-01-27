@@ -1,0 +1,36 @@
+---
+- name: "Create AZDO configuration database and set recovery model to {{ sql_azdo_config_db_recovery }}"
+  win_shell: |
+    $ServerInstance = "{{ sql_server_instance }}"
+    $DatabaseName = "{{ sql_azdo_config_db_name }}"
+
+    $Query = @"
+    DECLARE @Message NVARCHAR(255);
+    DECLARE @Changed BIT = 0;  -- Default value is 0
+
+    IF NOT EXISTS (
+        SELECT name 
+        FROM sys.databases 
+        WHERE name = '$DatabaseName'
+    )
+    BEGIN
+        CREATE DATABASE [$DatabaseName];
+        ALTER DATABASE [$DatabaseName] SET RECOVERY {{ sql_azdo_config_db_recovery }};
+        SET @Changed = 1;
+    END
+
+    -- Determine the message based on whether a change was detected
+    IF @Changed = 1  -- Change detected
+    BEGIN
+        SET @Message = 'Database created';
+    END
+    ELSE
+    BEGIN
+        SET @Message = 'Database already exists';
+    END
+    SELECT @Message AS ResultMessage;
+    "@
+    Invoke-Sqlcmd -ServerInstance $ServerInstance -Query $Query -ErrorAction Stop
+  register: result
+  changed_when:
+    - '"Database created" in result.stdout'

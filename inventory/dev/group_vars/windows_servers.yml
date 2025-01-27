@@ -1,0 +1,11 @@
+---
+ansible_connection: winrm
+ansible_port: 5985
+ansible_winrm_transport: kerberos
+ansible_winrm_kerberos_delegation: true
+ansible_winrm_server_cert_validation: ignore
+windows_tz: "W. Europe Standard Time"
+sql_server_instance: "azdo-sqlserver"  # Replace with your SQL Server instance name
+sql_user: "AZDOPOC\\azdo"   # Replace with the AD user's domain and username
+sql_azdo_db_label: "POC" # Variable can be empty, but must be defined. See https://learn.microsoft.com/en-us/azure/devops/server/install/sql-server/install-sql-server?view=azure-devops-2022#create-a-sql-server-database
+sql_azdo_config_db_name: "AzureDevOps_{{ sql_azdo_db_label }}Configuration"

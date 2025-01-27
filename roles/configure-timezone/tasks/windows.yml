@@ -1,0 +1,11 @@
+---
+- name: "Assert that Windows timezone vars are defined"
+  assert:
+    that:
+      - windows_tz is defined
+    fail_msg: "Not all required parameters for Windows timezone are set"
+    success_msg: "All required parameters for Windows timezone are set"
+
+- name: "Set timezone to {{ winows_tz }}"
+  win_timezone:
+    timezone: "{{ windows_tz }}"

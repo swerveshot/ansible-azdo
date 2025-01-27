@@ -1,0 +1,12 @@
+---
+- name: "Assert that Linux timezone vars are defined"
+  assert:
+    that:
+      - linux_tz is defined
+    fail_msg: "Not all required parameters for Linux timezone are set"
+    success_msg: "All required parameters for Linux timezone are set"
+
+- name: "Set timezone to {{ linux_tz }}"
+  become: true
+  community.general.timezone:
+    name: "{{ linux_tz }}"

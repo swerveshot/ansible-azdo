@@ -1,0 +1,12 @@
+---
+azdo_package_name: "Azure DevOps Server Express 2022 Update 2"
+azdo_product_id: "{e3673186-5d16-482e-a95f-dbe348872514}"
+azdo_install_executable: "D:\\AzureDevOpsExpress2022.2.exe"
+azdo_install_path: "{{ ansible_facts.env.ProgramFiles | default('C:\\Program Files') }}\\Azure DevOps Server 2022" # Use ProgramFiles env variable or default to C:\Program Files if no facts are available
+azdo_build_unattendfile_path: "{{ ansible_facts.env.TEMP | default('C:\\Windows\\Temp') }}\\unattend.ini"
+azdo_apptier_regkey: "HKLM:\\SOFTWARE\\Microsoft\\TeamFoundationServer\\19.0\\InstalledComponents\\ApplicationTier"
+azdo_build_unattendfile_args:
+  - "unattend"
+  - "/create"
+  - "/type:NewServerBasic"
+  - "/unattendfile: \"{{ azdo_build_unattendfile_path }}\""
