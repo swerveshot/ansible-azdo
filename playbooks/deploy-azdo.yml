@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars_files:
-    - ../../secrets/vault.yml
+    - ../../pgb-secrets/vault.yml
 
   gather_facts: true
 
@@ -11,7 +11,7 @@
 
 - hosts: database_servers
   vars_files:
-  - ../../secrets/vault.yml
+  - ../../pgb-secrets/vault.yml
   roles:
     - role: deploy-mssql # Provision SQL Server databases and AZDO user
       tags:
@@ -19,8 +19,8 @@
 
 - hosts: app
   vars_files:
-    - ../../secrets/vault.yml
-  serial: 1
+    - ../../pgb-secrets/vault.yml
+#  serial: 1
   roles:
     - role: deploy-azdo # Provision Azure DevOps Server
       tags:

@@ -1,0 +1,22 @@
+---
+- hosts: all
+  vars_files:
+    - ../../pgb-secrets/vault.yml
+  gather_facts: false
+ 
+  tasks:
+  - name: "Shutting down Windows VMs"
+  when: ansible_facts['os_family'] == "Windows"
+  block:
+    - name: shutdown host
+      win_command: shutdown.exe /s /f /t 5
+      async: 30
+      poll: 0
+    
+    # This is dependent on the transport you are using the port may differ for WinRM HTTPS or SSH
+    - name: wait for 
+      wait_for:
+        host: '{{ hostvars[inventory_hostname]["ansible_host"] | default(inventory_hostname) }}'
+        port: 5985
+        state: stopped
+      delegate_to: localhost

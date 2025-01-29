@@ -5,8 +5,18 @@ azdo_install_executable: "D:\\AzureDevOpsExpress2022.2.exe"
 azdo_install_path: "{{ ansible_facts.env.ProgramFiles | default('C:\\Program Files') }}\\Azure DevOps Server 2022" # Use ProgramFiles env variable or default to C:\Program Files if no facts are available
 azdo_build_unattendfile_path: "{{ ansible_facts.env.TEMP | default('C:\\Windows\\Temp') }}\\unattend.ini"
 azdo_apptier_regkey: "HKLM:\\SOFTWARE\\Microsoft\\TeamFoundationServer\\19.0\\InstalledComponents\\ApplicationTier"
-azdo_build_unattendfile_args:
+
+# Define AZDO installer arguments. Make sure to escape quotes properly so they are passed to Powershell
+azdo_build_unattendfile_first_args:
   - "unattend"
   - "/create"
   - "/type:NewServerBasic"
-  - "/unattendfile: \"{{ azdo_build_unattendfile_path }}\""
+  - "/unattendfile:`\"{{ azdo_build_unattendfile_path }}`\""
+  - "/inputs:InstallSqlExpress=False;SqlInstance={{ sql_server_instance }};CreateConfigurationDatabase=True;UseExistingEmptyDatabase=True;DatabaseLabel={{ sql_azdo_db_label }};IsServiceAccountBuiltIn=False;ServiceAccountName={{ sql_user }};CreateInitialCollection=False"
+
+azdo_build_unattendfile_additional_args:
+  - "unattend"
+  - "/create"
+  - "/type:ApplicationTierOnlyBasic"
+  - "/unattendfile:`\"{{ azdo_build_unattendfile_path }}`\""
+  - "/inputs:InstallSqlExpress=False;SqlInstance={{ sql_server_instance }};ConfigurationDatabaseName={{ sql_azdo_config_db_name }};IsServiceAccountBuiltIn=False;ServiceAccountName={{ sql_user }}"

@@ -11,7 +11,7 @@
     success_msg: "All required parameters for SQL are set"
 
 - name: "Include database provisioning tasks"
-  include: deploy-database.yml
+  include_tasks: deploy-database.yml
 
 - name: "Include user provisioning tasks"
-  include: deploy-user.yml
+  include_tasks: deploy-user.yml

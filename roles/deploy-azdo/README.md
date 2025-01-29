@@ -7,6 +7,7 @@ Deze rol installeert Azure DevOps Server 2022
 * Installation files zijn uitgepakt
 
 ## To-do
+* Voeg logica toe die voorkomt dat de tweede server gaat installeren voordat de eerste klaar is
 * Maak lijst van powershell argumenten beter leesbaar door deze op te knippen
 * Selectie van primaire en opeenvolgende AZDO servers aanpassen van ansible_play_hosts_all[0] naar een host variabele
 * Aanmaken default collection database
