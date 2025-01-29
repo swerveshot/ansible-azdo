@@ -11,6 +11,9 @@ ansible_log.txt
 *.swo
 *~
 
+# Ignore directories
+.vscode/
+
 # Ignore compiled python files
 __pycache__/
 *.py[cod]

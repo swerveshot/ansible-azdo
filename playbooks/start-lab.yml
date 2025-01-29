@@ -3,15 +3,15 @@
   gather_facts: false
  
   tasks:
-  - name : "Shutdown lab environment"
+  - name: "Start lab environment"
     delegate_to: localhost
 
     block:
     - name: "Check running lab VMs"
       ansible.builtin.shell: vmrun.exe -T ws list | grep -F "{{ vmx_file_path }}" || true
       register: vm_list
-      changed_when: vm_list.stdout | length > 0
-   
-    - name: "Shutdown lab VMs"
-      ansible.builtin.shell: vmrun.exe -T ws stop "{{ vmx_file_path }}"
-      when: vm_list.stdout | length > 0
+      changed_when: vm_list.stdout | length == 0
+  
+    - name: "Start Lab VMs"
+      ansible.builtin.shell: vmrun.exe -T ws start "{{ vmx_file_path }}" nogui
+      when: vm_list.stdout | length == 0
