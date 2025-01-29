@@ -1,6 +1,6 @@
 ---
 - name: "Assert that AZDO mandatory vars are defined"
-  assert:
+  ansible.builtin.assert:
     that:
       - ansible_facts is defined
       - azdo_install_path is defined

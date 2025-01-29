@@ -1,0 +1,4 @@
+ansible
+ansible-lint
+pywinrm>=0.4.0
+pywinrm[kerberos]>=0.4.0

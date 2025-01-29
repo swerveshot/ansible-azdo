@@ -1,6 +1,6 @@
 ---
 - name: "Assert that Linux timezone vars are defined"
-  assert:
+  ansible.builtin.assert:
     that:
       - linux_tz is defined
     fail_msg: "Not all required parameters for Linux timezone are set"

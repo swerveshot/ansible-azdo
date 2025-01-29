@@ -1,6 +1,6 @@
 ---
 - name: "Assert that SQL mandatory vars are defined"
-  assert:
+  ansible.builtin.assert:
     that:
       - sql_server_instance is defined
       - sql_user is defined

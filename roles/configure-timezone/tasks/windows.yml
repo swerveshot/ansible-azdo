@@ -1,6 +1,6 @@
 ---
 - name: "Assert that Windows timezone vars are defined"
-  assert:
+  ansible.builtin.assert:
     that:
       - windows_tz is defined
     fail_msg: "Not all required parameters for Windows timezone are set"
