@@ -11,7 +11,7 @@
     success_msg: "All required parameters for SQL are set"
 
 - name: "Include database provisioning tasks"
-  include_tasks: deploy-database.yml
+  ansible.builtin.include_tasks: deploy-database.yml
 
 - name: "Include user provisioning tasks"
-  include_tasks: deploy-user.yml
+  ansible.builtin.include_tasks: deploy-user.yml

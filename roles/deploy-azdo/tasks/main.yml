@@ -13,7 +13,7 @@
     success_msg: "All required parameters for AZDO are set"
 
 - name: "Include file extraction provisioning tasks"
-  include_tasks: extract.yml
+  ansible.builtin.include_tasks: extract.yml
 
 - name: "Include unattend file tasks"
-  include_tasks: unattend.yml
+  ansible.builtin.include_tasks: unattend.yml
