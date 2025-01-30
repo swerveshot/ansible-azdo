@@ -1,13 +1,16 @@
-- hosts: all
+---
+- name: Play for testing connectivity
+  hosts: all
   vars_files:
     - ../../pgb-secrets/vault.yml
   gather_facts: true
   tasks:
 
-   - name: "Ping servers"
-     ansible.builtin.ping:
-    register: ping_result
+    - name: "Ping servers"
+      ansible.windows.win_ping:
+      register: ping_result
+      when: ansible_facts['os_family'] == "Windows"
 
-   - name: "Ping result"
-     debug:
-      msg: "{{ ping_result }}"
+    - name: "Ping result"
+      ansible.builtin.debug:
+        msg: "{{ ping_result }}"
