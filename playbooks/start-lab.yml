@@ -18,4 +18,16 @@
          executable: /bin/bash
         when: vm_list.stdout | length == 0
 
+      - name: "Check VMware Tools status"
+        ansible.builtin.shell:
+         cmd: set -o pipefail && vmrun.exe -T ws checkToolsState "{{ vmx_file_path }}" || true
+         executable: /bin/bash
+        register: vmtools_status
+        async: 120   # Maximaal 120 seconden laten lopen
+        poll: 5      # Controleer elke 5 seconden
+        retries: 20  # Herhaal de controle max. 10 keer
+        delay: 5     # Wacht 5 seconden tussen pogingen
+        until: "'running' in vmtools_status.stdout"
+        changed_when: false
+
 # Test with these shell commands: start-lab && sleep 60 && shutdown-lab
