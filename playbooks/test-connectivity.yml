@@ -1,0 +1,13 @@
+- hosts: all
+  vars_files:
+    - ../../pgb-secrets/vault.yml
+  gather_facts: true
+  tasks:
+
+   - name: "Ping servers"
+     ansible.builtin.ping:
+    register: ping_result
+
+   - name: "Ping result"
+     debug:
+      msg: "{{ ping_result }}"

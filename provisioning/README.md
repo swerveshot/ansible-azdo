@@ -8,9 +8,9 @@ De POC omgeving heeft de volgende systeemeisen:
   * Linux zou eventueel ook kunnen, maar dit vereist een kleine aanpassing in de playbooks `start-lab.yml` en `shutdown-lab.yml`.
 * VMware workstation
   * Dit is tegenwoordig gratis te gebruiken, [ook voor zakelijke gebruikers,](https://blogs.vmware.com/cloud-foundation/2024/11/11/vmware-fusion-and-workstation-are-now-free-for-all-users/). Dit in tegenstelling tot bijvoorbeeld [virtalbox](https://forum.virtualbox.org/wiki/Licensing_FAQ).
-* Een Windows server geconfigureerd met de AD DS rol en een statisch IP adres.
-* Een Windows member server met een installatie van SQL Server.
-* Een of meerdere Windows server member servers die applicatie servers
+* Een VM met Windows server, geconfigureerd met de AD DS rol en een statisch IP adres.
+* Een VM met Windows server, geconfigureerd als member server en een installatie van SQL Server.
+* Een of meerdere VMs met Windows server, geconfigureerd als member servers ten behoeve van de DevOps server applicatie.
 
 ## Provisioning ansible worker
 ### Systeem packages
@@ -59,36 +59,69 @@ git config --global credential.helper "/mnt/c/Program\ Files/Git/mingw64/bin/git
 git config --global credential.https://dev.azure.com.useHttpPath true
 ```
 
+Als de setup van git gedaan is dan kan de repository gekloond worden. Stel hiertoe wel eerst de omgevingsvariabele `REPO_REMOTE` in naar het URL van jouw repository.
+```bash
+export REPO_REMOTE=https://server/project/repository.git
+git clone $REPO_REMOTE .
+```
+#### Secrets file
+De repository verwacht een bestand met secrets op deze locatie `../../pgb-secrets/vault.yml`. Zorg dat dit bestand bestaat met de juiste inhoud.
+
 ### Ansible setup
+In de repository bevind zich een bestand waarin alle benodigde python modules staan benodigd voor de installatie van ansible, inclusief de installatie van ansible zelf.
 ```bash
 python3 -m pip install --upgrade -r $REPO_DIR/provisioning/requirements.txt
+```
+
+Controleer of dit gewerkt heeft door de versie van ansible te installeren.
+```bash
+ansible --version
+```
+
+Controleer of de community.windows collection is geïnstalleerd.
+```bash
+ansible-galaxy collection list community.windows
 ```
 
 ### WSL Setup
 #### Gebruik DNS Server(s) van lab omgeving
 
-1. Neem deze config op in `/etc/wsl.conf`
-   ```bash
-   sudo sh -c 'echo "[network]\ngenerateResolvConf = false" >> /etc/wsl.conf'
-   ```
-2. Stop WSL.
-   ```bat
-   wsl --shutdown
-   ```
-   Als je meerdere distributies geïnstalleerd hebt kun je eerst de lijst van actieve distributies opvragen met:
-   ```bat
-   wsl --list --running
-   ```
-   En sluit de gewenste distributie af met:
-   ```bat
-   wsl --terminate DistroNaam
-   ```
-3. Herstart WSL, verwijder de symbolic link voor `/etc/resolv.conf` en maak een nieuw bestand aan
-   ```bash
-   sudo rm /etc/resolv.conf && sudo vi /etc/resolv.conf
-   ```
-4. Voeg de DNS servers en domein(en) toe
-   ```bash
-   nameserver 192.168.147.10
-   search azdopoc.localdomain
-   ```
+Neem deze config op in `/etc/wsl.conf`
+```bash
+sudo sh -c 'echo "[network]\ngenerateResolvConf = false" >> /etc/wsl.conf'
+```
+Stop WSL.
+```bat
+wsl --shutdown
+```
+Als je meerdere distributies geïnstalleerd hebt kun je eerst de lijst van actieve distributies opvragen met:
+```bat
+wsl --list --running
+```
+En sluit de gewenste distributie af met:
+```bat
+wsl --terminate DistroNaam
+```
+Herstart WSL, verwijder de symbolic link voor `/etc/resolv.conf` en maak een nieuw bestand aan
+```bash
+sudo rm /etc/resolv.conf && sudo vi /etc/resolv.conf
+```
+Voeg de DNS servers en domein(en) toe die in je POC omgeving gebruikt worden.
+```bash
+nameserver 192.168.147.10
+search azdopoc.localdomain
+```
+Test nu of je een van de servers in de POC omgeving kunt benaderen.
+```bash
+ping -c 3 azdo-adserver.azdopoc.localdomain
+```
+### Ansible testen
+Controleer of je met ansible de inventory kunt opvragen.
+```bash
+export REPO_DIR=~/pgb-azdo
+ansible-inventory -i $REPO_DIR/inventory/dev/hosts.yml --list
+```
+Controleer of je met ansible de facts van de servers in de inventory kunt opvragen.
+```bash
+ansible-playbook $REPO_DIR/playbooks/test-connectivity.yml -i $REPO_DIR/inventory/dev/hosts.yml
+```
