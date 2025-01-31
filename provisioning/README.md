@@ -12,6 +12,31 @@ De POC omgeving heeft de volgende systeemeisen:
 * Een VM met Windows server, geconfigureerd als member server en een installatie van SQL Server.
 * Een of meerdere VMs met Windows server, geconfigureerd als member servers ten behoeve van de DevOps server applicatie.
 
+Schematisch ziet deze setup er als volgt uit:
+
+```mermaid
+graph TD
+    subgraph A[Windows Systeem]
+        V[VS Code] --> B[Ubuntu WSL]
+        subgraph N[Intern Netwerk - NAT]
+            subgraph B[Ubuntu WSL]
+                G[Ansible]
+            end
+            subgraph C[VMware Workstation]
+                D[AD Server]
+                E[SQL Server]
+                X[APP Server 1]
+                Y[APP Server 2]
+            end
+        end
+    end
+
+    G -->|WinRM| D
+    G -->|WinRM| E
+    G -->|WinRM| X
+    G -->|WinRM| Y
+```
+
 ## Provisioning ansible worker
 ### Systeem packages
 
@@ -30,6 +55,7 @@ Uitzoeken hoe deze instellingen te automatiseren:
 * Default kerberos 5 realm (azdopoc.localdomain)
 * Kerberos servers (azdo-adserver.azdopoc.localdomain)
 * Administrative server (azdo-adserver.azdopoc.localdomain)
+
 Voor deze instellingen krijg je momenteel een prompt.
 
 ### Python setup
@@ -48,8 +74,8 @@ mkdir $REPO_DIR
 sh -c 'echo "# Custom aliases\nalias start-lab=\"ansible-playbook $REPO_DIR/playbooks/start-lab.yml -i $REPO_DIR/inventory/dev/hosts.yml\"\nalias shutdown-lab=\"ansible-playbook $REPO_DIR/playbooks/shutdown-lab.yml -i $REPO_DIR/inventory/dev/hosts.yml\"" >> ~/.bash_aliases'
 ```
 
-### Pull repository
-De repository is nodig omdat hier de setup files in zitten voor python en ansible
+### Clone repository
+Om de code uit de repository uit te kunnen voeren, maar bijvoorbeeld ook de setup van ansible af te maken zal deze gekloond moeten worden vanuit de bron server.
 
 #### Git setup
 ```bash
@@ -64,7 +90,12 @@ Als de setup van git gedaan is dan kan de repository gekloond worden. Stel hiert
 export REPO_REMOTE=https://server/project/repository.git
 git clone $REPO_REMOTE .
 ```
+
 #### Secrets file
+| ⚠️ WARNING             |
+|:------------------------|
+| Dit is zeer belangrijk  |
+
 De repository verwacht een bestand met secrets op deze locatie `../../pgb-secrets/vault.yml`. Zorg dat dit bestand bestaat met de juiste inhoud.
 
 ### Ansible setup
