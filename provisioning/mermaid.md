@@ -1,3 +1,4 @@
+```mermaid
 graph TD
     A[Windows Systeem] --> B[Ubuntu WSL]
     A --> C[VMware Workstation]
@@ -8,3 +9,4 @@ graph TD
     B --> G[Ansible naar VMs via WinRM]
     G --> D
     G --> E
+```
