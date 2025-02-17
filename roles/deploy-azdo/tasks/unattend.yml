@@ -5,7 +5,7 @@
 # Check documentation: https://learn.microsoft.com/en-us/azure/devops/server/command-line/tfsconfig-cmd?view=azure-devops-2022#unattend
 
 - name: "Check status of IsConfigured regkey"
-  win_reg_stat:
+  ansible.windows.win_reg_stat:
     path: "{{ azdo_apptier_regkey }}"
     name: "IsConfigured"
   register: isconfigured
@@ -25,21 +25,21 @@
     - not isconfigured.exists
   block:
 
-  - name: "Create unattend file"
-    win_shell: |
-      $arguments = "{{ azdo_build_unattendfile_args | join(' ') }}"
-      Start-Process -NoNewWindow -PassThru -Wait -FilePath "{{ azdo_install_path }}\\Tools\\TfsConfig.exe" -ArgumentList $arguments
-
-  - name: "Add ServiceAccountPassword to unattend file"
-    win_lineinfile:
-      path: "{{ azdo_build_unattendfile_path }}"
-      line: "ServiceAccountPassword={{ azdo_serviceaccount_password }}"
-
-  - name: "Run unattend installation of Azure DevOps Server"
-    win_shell: >
-      Start-Process -NoNewWindow -PassThru -Wait -FilePath "{{ azdo_install_path }}\\Tools\TfsConfig.exe" -ArgumentList "unattend /configure /unattendfile:`"{{ azdo_build_unattendfile_path }}`" /continue"
-
-  - name: "Remove unattend file"
-    win_file:
-      path: "{{ azdo_build_unattendfile_path }}"
-      state: absent
+    - name: "Create unattend file"
+      ansible.windows.win_shell: |
+        $arguments = "{{ azdo_build_unattendfile_args | join(' ') }}"
+        Start-Process -NoNewWindow -PassThru -Wait -FilePath "{{ azdo_install_path }}\\Tools\\TfsConfig.exe" -ArgumentList $arguments
+  
+    - name: "Add ServiceAccountPassword to unattend file"
+      community.windows.win_lineinfile:
+        path: "{{ azdo_build_unattendfile_path }}"
+        line: "ServiceAccountPassword={{ azdo_serviceaccount_password }}"
+  
+    - name: "Run unattend installation of Azure DevOps Server"
+      ansible.windows.win_shell: >
+        Start-Process -NoNewWindow -PassThru -Wait -FilePath "{{ azdo_install_path }}\\Tools\TfsConfig.exe" -ArgumentList "unattend /configure /unattendfile:`"{{ azdo_build_unattendfile_path }}`" /continue"
+  
+    - name: "Remove unattend file"
+      community.windows.win_lineinfile:
+        path: "{{ azdo_build_unattendfile_path }}"
+        state: absent

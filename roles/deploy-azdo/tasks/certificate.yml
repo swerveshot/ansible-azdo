@@ -1,0 +1,41 @@
+---
+- name: "Retreive information about certificates in the computer's personal store"
+  community.windows.win_certificate_info:
+  register: mycert
+
+# As MVP this is fine, but the proper way is to check valid_to as well
+- name: "Retreive certificates where the subject name equals the hostname"
+  ansible.builtin.set_fact:
+    matching_cert: "{{ mycert.certificates | selectattr('subject', 'equalto', 'CN=' + ansible_facts['hostname'] | upper) | list | first }}"
+  when: mycert.exists
+
+- name: "Creating self signed certificate and create IIS site binding"
+  when: matching_cert is not defined
+  block:
+
+  # According to the documentation of the win_certificate_store module this module cannot create certificates.
+  # Using win_shell to create a self signed certificate.
+  - name: "Create self signed certificate"
+    ansible.windows.win_shell: |
+      $certParams = @{
+          CertStoreLocation = 'Cert:\LocalMachine\My'
+          DnsName           = $env:COMPUTERNAME
+          NotAfter          = (Get-Date).AddYears(1)
+          Provider          = 'Microsoft Software Key Storage Provider'
+          Subject           = "CN=$env:COMPUTERNAME"
+      }
+      $cert = New-SelfSignedCertificate @certParams
+      $cert | Select-Object Thumbprint, Subject, NotAfter, FriendlyName | ConvertTo-Json
+    register: cert_output
+
+  - name: "Create fact from JSON output"
+    ansible.builtin.set_fact:
+      created_cert: "{{ cert_output.stdout | from_json }}"
+
+  - name: Add a HTTPS binding on port 443
+    community.windows.win_iis_webbinding:
+      name: Azure DevOps Server
+      protocol: https
+      port: 443
+      certificate_hash: "{{ created_cert.Thumbprint }}"
+      state: present

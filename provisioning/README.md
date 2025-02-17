@@ -7,7 +7,7 @@ De POC omgeving heeft de volgende systeemeisen:
 * Windows 10 of Windows 11
   * Linux zou eventueel ook kunnen, maar dit vereist een kleine aanpassing in de playbooks `start-lab.yml` en `shutdown-lab.yml`.
 * VMware workstation
-  * Dit is tegenwoordig gratis te gebruiken, [ook voor zakelijke gebruikers,](https://blogs.vmware.com/cloud-foundation/2024/11/11/vmware-fusion-and-workstation-are-now-free-for-all-users/). Dit in tegenstelling tot bijvoorbeeld [virtalbox](https://forum.virtualbox.org/wiki/Licensing_FAQ).
+  * Dit is tegenwoordig gratis te gebruiken, [ook voor zakelijke gebruikers,](https://blogs.vmware.com/cloud-foundation/2024/11/11/vmware-fusion-and-workstation-are-now-free-for-all-users/). Dit in tegenstelling tot bijvoorbeeld [virtualbox](https://forum.virtualbox.org/wiki/Licensing_FAQ).
 * Een VM met Windows server, geconfigureerd met de AD DS rol en een statisch IP adres.
 * Een VM met Windows server, geconfigureerd als member server en een installatie van SQL Server.
 * Een of meerdere VMs met Windows server, geconfigureerd als member servers ten behoeve van de DevOps server applicatie.

@@ -1,6 +1,6 @@
 ---
 - name: "Create AZDO configuration database and set recovery model to {{ sql_azdo_config_db_recovery }}"
-  win_shell: |
+  ansible.windows.win_shell: |
     $ServerInstance = "{{ sql_server_instance }}"
     $DatabaseName = "{{ sql_azdo_config_db_name }}"
 

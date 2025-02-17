@@ -17,7 +17,7 @@
    azdo_install_status: "{{ azdo_regkey_status.results | selectattr('exists', 'defined') | selectattr('exists', 'equalto', true) | list | length > 0 }}"
 
 - name: "Extracting AZDO installation files (this may take a while)"
-  win_shell: >
+  ansible.windows.win_shell: >
     Start-Process -FilePath "{{ azdo_install_executable }}" -ArgumentList "/S /CustomInstallPath `"{{ azdo_install_path }}`"" -NoNewWindow -PassThru -Wait
   when: not azdo_install_status
   register: azdo_extraction_status

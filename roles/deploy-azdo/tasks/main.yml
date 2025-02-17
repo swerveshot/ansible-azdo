@@ -17,3 +17,6 @@
 
 - name: "Include unattend file tasks"
   ansible.builtin.include_tasks: unattend.yml
+
+- name: "Include certificate tasks"
+  ansible.builtin.include_tasks: certificate.yml
